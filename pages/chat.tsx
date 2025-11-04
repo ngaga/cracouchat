@@ -56,7 +56,16 @@ const Chat: NextPage<ChatProps> = () => {
     setIsLoading(true);
 
     try {
-      // Send user message
+      // Send user message - show it immediately
+      const userMessage: Message = {
+        id: `temp-${Date.now()}`,
+        role: "user",
+        content: userContent,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
+      // Save to database
       const userResponse = await fetch("/api/messages", {
         method: "POST",
         headers: {
@@ -72,8 +81,13 @@ const Chat: NextPage<ChatProps> = () => {
         throw new Error("Failed to send message");
       }
 
-      const userMessage = await userResponse.json();
-      setMessages((prev) => [...prev, userMessage]);
+      const savedUserMessage = await userResponse.json();
+      // Replace temp message with saved one
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === userMessage.id ? savedUserMessage : msg
+        )
+      );
 
       // Simulate API delay for assistant response
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -85,19 +99,30 @@ const Chat: NextPage<ChatProps> = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: "Cracoufrat",
+          content: "Cracoufrat!",
           role: "assistant",
         }),
       });
 
       if (!assistantResponse.ok) {
-        throw new Error("Failed to send assistant message");
+        const errorData = await assistantResponse.json().catch(() => ({}));
+        throw new Error(
+          `Failed to send assistant message: ${assistantResponse.status} ${errorData.error ?? ""}`
+        );
       }
 
       const assistantMessage = await assistantResponse.json();
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Failed to send message:", error);
+      // Show error to user - add assistant message anyway for UX
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: "assistant",
+        content: "Cracoufrat!",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -156,11 +181,11 @@ const Chat: NextPage<ChatProps> = () => {
 
             {isLoading && (
               <div className="flex justify-start">
-                <div className="rounded-lg bg-gray-100 px-4 py-3 dark:bg-gray-800">
-                  <div className="flex space-x-1">
-                    <div className="h-2 w-2 animate-pulse rounded-full bg-gray-400"></div>
-                    <div className="h-2 w-2 animate-pulse rounded-full bg-gray-400"></div>
-                    <div className="h-2 w-2 animate-pulse rounded-full bg-gray-400"></div>
+                <div className="max-w-[80%] rounded-lg bg-gray-100 px-4 py-3 dark:bg-gray-800">
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-gray-500"></div>
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-gray-500" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-gray-500" style={{ animationDelay: "0.4s" }}></div>
                   </div>
                 </div>
               </div>

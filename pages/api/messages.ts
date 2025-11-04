@@ -25,8 +25,16 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  await connectDatabase();
-  await syncDatabase();
+  try {
+    await connectDatabase();
+    await syncDatabase();
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return res.status(500).json({
+      error: "Database connection failed",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
 
   if (req.method === "GET") {
     try {
