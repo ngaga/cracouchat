@@ -119,7 +119,7 @@ const Chat: NextPage<ChatProps> = () => {
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         role: "assistant",
-        content: "Cracoufrat!",
+        content: "Nom d'un Cracoufrat!",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
