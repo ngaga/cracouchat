@@ -17,6 +17,7 @@ const Chat: NextPage<ChatProps> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,6 +54,7 @@ const Chat: NextPage<ChatProps> = () => {
 
     const userContent = input.trim();
     setInput("");
+    inputRef.current?.focus();
     setIsLoading(true);
 
     try {
@@ -125,6 +127,7 @@ const Chat: NextPage<ChatProps> = () => {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      inputRef.current?.focus();
     }
   };
 
@@ -203,9 +206,9 @@ const Chat: NextPage<ChatProps> = () => {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                ref={inputRef}
                 placeholder="Type your message..."
                 className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-foreground-muted focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={isLoading}
               />
               <button
                 type="submit"
