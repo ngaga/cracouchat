@@ -1,6 +1,9 @@
 import type { CreationOptional, InferAttributes, InferCreationAttributes } from "sequelize";
 import { DataTypes, Model } from "sequelize";
 
+import { ConversationModel } from "@app/lib/models/Conversation";
+import { UserModel } from "@app/lib/models/User";
+
 import { sequelize } from "../database";
 
 export class MessageModel extends Model<
@@ -8,8 +11,9 @@ export class MessageModel extends Model<
   InferCreationAttributes<MessageModel>
 > {
   declare id: CreationOptional<number>;
+  declare sId: CreationOptional<string>;
   declare content: string;
-  declare role: "user" | "assistant";
+  declare authorId: string;
   declare conversationId: string;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
@@ -26,14 +30,19 @@ MessageModel.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    role: {
-      type: DataTypes.ENUM("user", "assistant"),
+    sId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
+      unique: true,
+    },
+    authorId: {
+      type: DataTypes.UUID,
       allowNull: false,
     },
     conversationId: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "default",
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -55,9 +64,27 @@ MessageModel.init(
         fields: ["conversationId"],
       },
       {
+        fields: ["authorId"],
+      },
+      {
         fields: ["createdAt"],
+      },
+      {
+        fields: ["sId"],
+        unique: true,
       },
     ],
   }
 );
+
+MessageModel.belongsTo(ConversationModel, {
+  foreignKey: "conversationId",
+  as: "conversation",
+});
+
+MessageModel.belongsTo(UserModel, {
+  foreignKey: "authorId",
+  as: "author",
+});
+
 
