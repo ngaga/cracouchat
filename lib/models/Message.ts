@@ -39,10 +39,22 @@ MessageModel.init(
     authorId: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: UserModel,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "NO ACTION",
     },
     conversationId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: ConversationModel,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "NO ACTION",
     },
     createdAt: {
       type: DataTypes.DATE,
