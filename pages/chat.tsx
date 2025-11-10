@@ -47,6 +47,12 @@ const Chat: NextPage<ChatProps> = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (status === "authenticated" && selectedConversationId && !isSendingMessage) {
+      inputRef.current?.focus();
+    }
+  }, [status, selectedConversationId, isSendingMessage]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
